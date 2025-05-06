@@ -12,8 +12,8 @@ import React, { useState, useEffect } from 'react';
      useEffect(() => {
        const fetchData = async () => {
          try {
-           const telemetryRes = await axios.get('https://<your-backend-url>/api/telemetry');
-           const detectionsRes = await axios.get('https://<your-backend-url>/api/detections');
+           const telemetryRes = await axios.get('https://vehicle-tracking-backend-bwmz.onrender.com/api/telemetry');
+           const detectionsRes = await axios.get('https://vehicle-tracking-backend-bwmz.onrender.com/api/detections');
            setTelemetry(telemetryRes.data);
            setDetections(detectionsRes.data);
          } catch (error) {
