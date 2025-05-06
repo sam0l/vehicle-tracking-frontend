@@ -3,7 +3,7 @@ import axios from 'axios';
 import { MapContainer, TileLayer, Marker, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
-import './App.css';
+import './index.css';
 
 // Fix Leaflet marker icon issue
 delete L.Icon.Default.prototype._getIconUrl;
@@ -36,67 +36,72 @@ function App() {
       }
     };
     fetchData();
+    const interval = setInterval(fetchData, 5000); // Poll every 5 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const path = telemetry.map(point => [point.latitude, point.longitude]);
   const latestPoint = telemetry.length > 0 ? telemetry[telemetry.length - 1] : null;
 
   return (
-    <div className="App">
-      <h1>Vehicle Tracking Dashboard</h1>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Vehicle Tracking Dashboard</h1>
+      {error && <p className="text-red-500">{error}</p>}
       
-      <div style={{ height: '500px', width: '100%' }}>
-        <MapContainer center={[37.7749, -122.4194]} zoom={13} style={{ height: '100%' }}>
-          <TileLayer
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          />
-          {latestPoint && (
-            <Marker position={[latestPoint.latitude, latestPoint.longitude]} />
-          )}
-          {path.length > 1 && <Polyline positions={path} color="blue" />}
-        </MapContainer>
+      <div className="mb-4">
+        <h2 className="text-xl mb-2">Real-Time Map</h2>
+        <div style={{ height: '400px', width: '100%' }}>
+          <MapContainer center={[37.7749, -122.4194]} zoom={13} style={{ height: '100%', width: '100%' }}>
+            <TileLayer
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            />
+            {latestPoint && (
+              <Marker position={[latestPoint.latitude, latestPoint.longitude]} />
+            )}
+            {path.length > 1 && <Polyline positions={path} color="blue" />}
+          </MapContainer>
+        </div>
       </div>
 
-      <div>
-        <h2>Latest Telemetry</h2>
+      <div className="mb-4">
+        <h2 className="text-xl mb-2">Latest Telemetry</h2>
         {latestPoint ? (
-          <p>
-            Speed: {latestPoint.speed} km/h<br />
-            Coordinates: {latestPoint.latitude}, {latestPoint.longitude}<br />
-            Timestamp: {new Date(latestPoint.timestamp).toLocaleString()}
-          </p>
+          <div>
+            <p>Speed: {latestPoint.speed} km/h</p>
+            <p>Coordinates: ({latestPoint.latitude}, {latestPoint.longitude})</p>
+            <p>Timestamp: {new Date(latestPoint.timestamp).toLocaleString()}</p>
+          </div>
         ) : (
           <p>No telemetry data available.</p>
         )}
       </div>
 
       <div>
-        <h2>Detections</h2>
+        <h2 className="text-xl mb-2">Traffic Sign Detections</h2>
         {detections.length > 0 ? (
-          <table border="1">
+          <table className="w-full border-collapse border">
             <thead>
               <tr>
-                <th>Sign Type</th>
-                <th>Image</th>
-                <th>Coordinates</th>
-                <th>Timestamp</th>
+                <th className="border p-2">Sign Type</th>
+                <th className="border p-2">Image</th>
+                <th className="border p-2">Coordinates</th>
+                <th className="border p-2">Timestamp</th>
               </tr>
             </thead>
             <tbody>
               {detections.map((det, index) => (
                 <tr key={index}>
-                  <td>{det.sign_type}</td>
-                  <td>
+                  <td className="border p-2">{det.sign_type}</td>
+                  <td className="border p-2">
                     <img
-                      src={`data:image/png;base64,${det.image}`}
+                      src={`data:image/jpeg;base64,${det.image}`}
                       alt="Traffic Sign"
-                      style={{ width: '100px' }}
+                      className="w-24"
                     />
                   </td>
-                  <td>{det.latitude}, {det.longitude}</td>
-                  <td>{new Date(det.timestamp).toLocaleString()}</td>
+                  <td className="border p-2">({det.latitude}, {det.longitude})</td>
+                  <td className="border p-2">{new Date(det.timestamp).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
