@@ -30,7 +30,7 @@ const ConnectionStatus = () => {
     const checkConnection = async () => {
       try {
         const response = await fetch(
-          'https://vehicle-tracking-backend-bwmz.onrender.com/api/detections?limit=1',
+          'https://vehicle-tracking-backend-bwmz.onrender.com/api/device_status',
           {
             headers: {
               'Accept': 'application/json',
@@ -44,18 +44,10 @@ const ConnectionStatus = () => {
         }
         
         const data = await response.json();
-        
-        if (data.data && data.data.length > 0) {
-          const timestamp = data.data[0].timestamp;
-          const isRecent = isRecentData(timestamp);
-          setIsConnected(isRecent);
-          setLastSeen(timestamp);
-          setError(isRecent ? null : 'No recent data');
-          setRetryCount(0); // Reset retry count on success
-        } else {
-          setIsConnected(false);
-          setError('No data available');
-        }
+        setIsConnected(data.status === 'connected');
+        setLastSeen(data.last_seen);
+        setError(data.message);
+        setRetryCount(0); // Reset retry count on success
       } catch (error) {
         console.error('Error checking connection:', error);
         setIsConnected(false);
