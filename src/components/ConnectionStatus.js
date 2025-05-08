@@ -6,6 +6,26 @@ const ConnectionStatus = () => {
   const [error, setError] = useState(null);
   const [retryCount, setRetryCount] = useState(0);
 
+  const formatDate = (date) => {
+    return new Date(date).toLocaleString('en-SG', {
+      timeZone: 'Asia/Singapore',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+  };
+
+  const isRecentData = (timestamp) => {
+    const now = new Date();
+    const dataTime = new Date(timestamp);
+    const diffMinutes = (now - dataTime) / (1000 * 60);
+    return diffMinutes <= 5; // Consider data recent if within last 5 minutes
+  };
+
   useEffect(() => {
     const checkConnection = async () => {
       try {
@@ -26,9 +46,11 @@ const ConnectionStatus = () => {
         const data = await response.json();
         
         if (data.data && data.data.length > 0) {
-          setIsConnected(true);
-          setLastSeen(new Date(data.data[0].timestamp));
-          setError(null);
+          const timestamp = data.data[0].timestamp;
+          const isRecent = isRecentData(timestamp);
+          setIsConnected(isRecent);
+          setLastSeen(timestamp);
+          setError(isRecent ? null : 'No recent data');
           setRetryCount(0); // Reset retry count on success
         } else {
           setIsConnected(false);
@@ -68,7 +90,7 @@ const ConnectionStatus = () => {
       )}
       {lastSeen && (
         <p className="text-xs text-gray-500 mt-1">
-          Last seen: {lastSeen.toLocaleString()}
+          Last seen: {formatDate(lastSeen)}
         </p>
       )}
     </div>
