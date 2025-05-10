@@ -33,7 +33,9 @@ const SimDataDisplay = () => {
 
   const fetchSimData = async () => {
     try {
-      const response = await fetch('/api/sim-data');
+      // Always use the full backend URL
+      const backendUrl = process.env.REACT_APP_BACKEND_URL || 'https://vehicle-tracking-backend-bwmz.onrender.com';
+      const response = await fetch(`${backendUrl}/api/sim-data`);
       if (!response.ok) {
         throw new Error('Failed to fetch SIM data');
       }
