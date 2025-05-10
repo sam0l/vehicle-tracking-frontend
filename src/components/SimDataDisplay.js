@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Typography, CircularProgress, Grid, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
-import SpeedIcon from '@mui/icons-material/Speed';
 import StorageIcon from '@mui/icons-material/Storage';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 
@@ -29,28 +28,17 @@ const IconContainer = styled(Box)(({ theme }) => ({
 
 const SimDataDisplay = () => {
   const [simData, setSimData] = useState(null);
-  const [consumption, setConsumption] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const fetchSimData = async () => {
     try {
-      const [balanceResponse, consumptionResponse] = await Promise.all([
-        fetch('/api/sim-data'),
-        fetch('/api/sim-data/consumption')
-      ]);
-
-      if (!balanceResponse.ok || !consumptionResponse.ok) {
+      const response = await fetch('/api/sim-data');
+      if (!response.ok) {
         throw new Error('Failed to fetch SIM data');
       }
-
-      const [balanceData, consumptionData] = await Promise.all([
-        balanceResponse.json(),
-        consumptionResponse.json()
-      ]);
-
-      setSimData(balanceData);
-      setConsumption(consumptionData);
+      const data = await response.json();
+      setSimData(data);
       setError(null);
     } catch (err) {
       setError(err.message);
@@ -94,21 +82,10 @@ const SimDataDisplay = () => {
           <IconContainer>
             <StorageIcon color="primary" />
             <Typography variant="body1">
-              Remaining Balance:
+              Balance Info:
             </Typography>
             <Typography variant="h6" color="primary">
-              {simData ? `${simData.balance} ${simData.unit}` : 'N/A'}
-            </Typography>
-          </IconContainer>
-        </Grid>
-        <Grid item xs={12}>
-          <IconContainer>
-            <SpeedIcon color="primary" />
-            <Typography variant="body1">
-              Current Rate:
-            </Typography>
-            <Typography variant="h6" color="primary">
-              {consumption ? `${consumption.current_rate.toFixed(2)} MB/s` : 'N/A'}
+              {simData ? simData.balance : 'N/A'}
             </Typography>
           </IconContainer>
         </Grid>
@@ -119,7 +96,7 @@ const SimDataDisplay = () => {
               Total Usage:
             </Typography>
             <Typography variant="h6" color="primary">
-              {consumption ? `${(consumption.total_bytes / (1024 * 1024)).toFixed(2)} MB` : 'N/A'}
+              {simData && simData.data_usage != null ? `${(simData.data_usage / (1024 * 1024)).toFixed(2)} MB` : 'N/A'}
             </Typography>
           </IconContainer>
         </Grid>
@@ -127,7 +104,7 @@ const SimDataDisplay = () => {
           <IconContainer>
             <AccessTimeIcon color="primary" />
             <Typography variant="caption" color="textSecondary">
-              Last updated: {new Date(simData?.timestamp * 1000).toLocaleString()}
+              Last updated: {simData && simData.timestamp ? new Date(simData.timestamp).toLocaleString() : 'N/A'}
             </Typography>
           </IconContainer>
         </Grid>
