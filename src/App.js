@@ -3,6 +3,7 @@ import Map from './components/Map';
 import Detections from './components/Detections';
 import SpeedDisplay from './components/SpeedDisplay';
 import ConnectionStatus from './components/ConnectionStatus';
+import SimDataDisplay from './components/SimDataDisplay';
 import './App.css';
 
 function App() {
@@ -24,6 +25,9 @@ function App() {
             </div>
             <div className="col-span-1">
               <ConnectionStatus />
+            </div>
+            <div className="col-span-1">
+              <SimDataDisplay />
             </div>
           </div>
 
