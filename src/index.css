@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Leaflet map container styles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Custom styles for the speed display */
+.speed-display {
+  @apply bg-white shadow rounded-lg p-6;
+}
+
+.speed-value {
+  @apply text-4xl font-bold text-blue-600;
+}
+
+.speed-unit {
+  @apply ml-2 text-gray-500;
+}
+
+/* Custom styles for the map controls */
+.map-controls {
+  @apply absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg;
+}
+
+.map-control-button {
+  @apply px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300;
+}
+
+/* Custom styles for the detections table */
+.detections-table {
+  @apply w-full border-collapse border;
+}
+
+.detections-table th {
+  @apply border p-2 bg-gray-200;
+}
+
+.detections-table td {
+  @apply border p-2;
+}
+
+.detections-image {
+  @apply w-24 h-24 object-cover;
+}
