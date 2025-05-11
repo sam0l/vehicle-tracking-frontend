@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { backendUrl } from '../config';
 
 // Fix for default marker icons in Leaflet with React
 delete L.Icon.Default.prototype._getIconUrl;
@@ -23,7 +24,7 @@ const Map = () => {
     try {
       const skip = (pageNum - 1) * limit;
       const response = await fetch(
-        `https://vehicle-tracking-backend-bwmz.onrender.com/api/detections?skip=${skip}&limit=${limit}`
+        `${backendUrl}/api/detections?skip=${skip}&limit=${limit}`
       );
       const data = await response.json();
       

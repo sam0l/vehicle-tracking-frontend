@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { backendUrl } from '../config';
 
 const PastLogs = () => {
   const [pastDetections, setPastDetections] = useState([]);
@@ -7,7 +8,7 @@ const PastLogs = () => {
   useEffect(() => {
     const fetchPastDetections = async () => {
       try {
-        const response = await fetch('https://vehicle-tracking-backend-bwmz.onrender.com/api/past_detections');
+        const response = await fetch(`${backendUrl}/api/past_detections`);
         const data = await response.json();
         // Ensure data is an array
         setPastDetections(Array.isArray(data) ? data : []);

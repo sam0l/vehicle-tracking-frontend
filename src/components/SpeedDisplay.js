@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { backendUrl } from '../config';
 
 const SpeedDisplay = () => {
   const [currentSpeed, setCurrentSpeed] = useState(null);
@@ -30,7 +31,7 @@ const SpeedDisplay = () => {
     const fetchSpeed = async () => {
       try {
         const response = await fetch(
-          'https://vehicle-tracking-backend-bwmz.onrender.com/api/detections?limit=1',
+          `${backendUrl}/api/detections?limit=1`,
           {
             headers: {
               'Accept': 'application/json',

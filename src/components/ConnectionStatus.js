@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { backendUrl } from '../config';
 
 const ConnectionStatus = () => {
   const [isConnected, setIsConnected] = useState(false);
@@ -30,7 +31,7 @@ const ConnectionStatus = () => {
     const checkConnection = async () => {
       try {
         const response = await fetch(
-          'https://vehicle-tracking-backend-bwmz.onrender.com/api/device_status',
+          `${backendUrl}/api/device_status`,
           {
             headers: {
               'Accept': 'application/json',

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, Typography, CircularProgress, Grid, Box } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import StorageIcon from '@mui/icons-material/Storage';
+import { backendUrl } from '../config';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(2),
@@ -37,7 +38,6 @@ const SimDataDisplay = () => {
   const fetchUsage = async () => {
     try {
       // Use the edge device API endpoint
-      const backendUrl = process.env.REACT_APP_EDGE_URL || 'http://localhost:5000';
       const response = await fetch(`${backendUrl}/api/data-usage`);
       if (!response.ok) {
         throw new Error('Failed to fetch data usage');
