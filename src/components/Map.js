@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { backendUrl } from '../config';
@@ -62,6 +62,8 @@ const Map = () => {
     ? [detections[0].latitude, detections[0].longitude]
     : [0, 0];
 
+  const pathPositions = detections.map(detection => [detection.latitude, detection.longitude]);
+
   return (
     <div className="h-[600px] relative">
       <MapContainer
@@ -89,6 +91,7 @@ const Map = () => {
             </Popup>
           </Marker>
         ))}
+        {pathPositions.length > 0 && <Polyline pathOptions={{ color: 'blue' }} positions={pathPositions} />}
       </MapContainer>
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg">
         <div className="flex space-x-4">
