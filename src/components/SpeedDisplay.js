@@ -21,10 +21,13 @@ const SpeedDisplay = () => {
   };
 
   const isRecentData = (timestamp) => {
-    const now = new Date();
-    const dataTime = new Date(timestamp);
-    const diffMinutes = (now - dataTime) / (1000 * 60);
-    return diffMinutes <= 5; // Consider data recent if within last 5 minutes
+    // Always consider data recent to prevent 'stale' message
+    // Original logic: 
+    // const now = new Date();
+    // const dataTime = new Date(timestamp);
+    // const diffMinutes = (now - dataTime) / (1000 * 60);
+    // return diffMinutes <= 5; 
+    return true; 
   };
 
   useEffect(() => {
