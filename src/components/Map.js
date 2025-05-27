@@ -12,6 +12,15 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
 });
 
+const MapUpdater = ({ map, center, zoom }) => {
+  useEffect(() => {
+    if (map && center) {
+      map.setView(center, zoom);
+    }
+  }, [map, center, zoom]);
+  return null;
+};
+
 const Map = () => {
   const [detections, setDetections] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -19,6 +28,7 @@ const Map = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const limit = 50;
+  const [map, setMap] = useState(null);
 
   const fetchDetections = async (pageNum = 1) => {
     try {
@@ -58,40 +68,45 @@ const Map = () => {
     return <div className="p-4 text-red-500">{error}</div>;
   }
 
-  const center = detections.length > 0
-    ? [detections[0].latitude, detections[0].longitude]
-    : [0, 0];
+  // Default initial center, e.g., Singapore. The map will pan to the latest point once data loads.
+  const initialCenter = [1.3521, 103.8198]; 
+  const latestDetection = detections.length > 0 ? detections[0] : null;
+  const latestPosition = latestDetection ? [latestDetection.latitude, latestDetection.longitude] : null;
 
   const pathPositions = detections.map(detection => [detection.latitude, detection.longitude]);
 
   return (
     <div className="h-[600px] relative">
       <MapContainer
-        center={center}
+        center={initialCenter} // Use a fixed initial center
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        whenCreated={setMap} // Get the map instance
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {detections.map((detection) => (
+        {/* Show a single marker for the latest position */}
+        {latestDetection && (
           <Marker
-            key={detection.id}
-            position={[detection.latitude, detection.longitude]}
+            key={`current-${latestDetection.id}`}
+            position={latestPosition}
           >
             <Popup>
               <div>
-                <p><strong>Speed:</strong> {detection.speed} km/h</p>
-                <p><strong>Time:</strong> {new Date(detection.timestamp).toLocaleString()}</p>
-                {detection.sign_type && (
-                  <p><strong>Sign Type:</strong> {detection.sign_type}</p>
+                <p><strong>Speed:</strong> {latestDetection.speed} km/h</p>
+                <p><strong>Time:</strong> {new Date(latestDetection.timestamp).toLocaleString()}</p>
+                {latestDetection.sign_type && (
+                  <p><strong>Sign Type:</strong> {latestDetection.sign_type}</p>
                 )}
+                {/* You can add more details from latestDetection here */}
               </div>
             </Popup>
           </Marker>
-        ))}
+        )}
         {pathPositions.length > 0 && <Polyline pathOptions={{ color: 'blue' }} positions={pathPositions} />}
+        {map && latestPosition && <MapUpdater map={map} center={latestPosition} zoom={map.getZoom()} />}
       </MapContainer>
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg">
         <div className="flex space-x-4">
