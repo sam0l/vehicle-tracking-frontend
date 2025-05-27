@@ -8,16 +8,23 @@ const ConnectionStatus = () => {
   const [retryCount, setRetryCount] = useState(0);
 
   const formatDate = (date) => {
-    return new Date(date).toLocaleString('en-SG', {
-      timeZone: 'Asia/Singapore',
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      hour12: false
-    });
+    if (!date) return 'N/A';
+    try {
+      const dateObj = new Date(date);
+      return dateObj.toLocaleString('en-SG', {
+        timeZone: 'Asia/Singapore',
+        year: 'numeric',
+        month: 'numeric', // e.g., 5 instead of 05
+        day: 'numeric',   // e.g., 28 instead of 28
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true      // Use AM/PM
+      });
+    } catch (error) {
+      console.error("Error formatting date:", date, error);
+      return "Invalid Date";
+    }
   };
 
   const isRecentData = (timestamp) => {

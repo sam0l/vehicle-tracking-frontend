@@ -1,6 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { backendUrl } from '../config';
 
+const formatDisplayDate = (dateString) => {
+  if (!dateString) return 'N/A';
+  try {
+    const dateObj = new Date(dateString);
+    return dateObj.toLocaleString('en-SG', {
+      timeZone: 'Asia/Singapore',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+  } catch (error) {
+    console.error("Error formatting date:", dateString, error);
+    return "Invalid Date";
+  }
+};
+
 const PastLogs = () => {
   const [pastDetections, setPastDetections] = useState([]);
   const [error, setError] = useState(null);
@@ -49,7 +69,7 @@ const PastLogs = () => {
           <tbody>
             {pastDetections.map((detection) => (
               <tr key={detection.id}>
-                <td className="border p-2">{new Date(detection.timestamp).toLocaleString()}</td>
+                <td className="border p-2">{formatDisplayDate(detection.timestamp)}</td>
                 <td className="border p-2">{detection.latitude}</td>
                 <td className="border p-2">{detection.longitude}</td>
                 <td className="border p-2">{detection.speed}</td>
