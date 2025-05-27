@@ -70,6 +70,7 @@ const Map = () => {
 
   // Default initial center, e.g., Singapore. The map will pan to the latest point once data loads.
   const initialCenter = [1.3521, 103.8198]; 
+  const preferredZoom = 17; // Define a closer zoom level
   const latestDetection = detections.length > 0 ? detections[0] : null;
   const latestPosition = latestDetection ? [latestDetection.latitude, latestDetection.longitude] : null;
 
@@ -79,7 +80,7 @@ const Map = () => {
     <div className="h-[600px] relative">
       <MapContainer
         center={initialCenter} // Use a fixed initial center
-        zoom={13}
+        zoom={preferredZoom} // Use the new preferred zoom for initialization
         style={{ height: '100%', width: '100%' }}
         whenCreated={setMap} // Get the map instance
       >
@@ -106,7 +107,7 @@ const Map = () => {
           </Marker>
         )}
         {pathPositions.length > 0 && <Polyline pathOptions={{ color: 'blue' }} positions={pathPositions} />}
-        {map && latestPosition && <MapUpdater map={map} center={latestPosition} zoom={map.getZoom()} />}
+        {map && latestPosition && <MapUpdater map={map} center={latestPosition} zoom={preferredZoom} />} // Always use preferredZoom
       </MapContainer>
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg">
         <div className="flex space-x-4">
