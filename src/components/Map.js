@@ -27,17 +27,18 @@ const MapUpdater = ({ map, center, zoom }) => {
 };
 
 const Map = () => {
-  const [detections, setDetections] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [detections, setDetections] = useState([]); // For drawing the historical path
+  const [latestDetectionForMap, setLatestDetectionForMap] = useState(null); // For current marker, popup, and centering
   const [error, setError] = useState(null);
+  const [map, setMap] = useState(null); // State to hold the map instance
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const limit = 50;
-  const [map, setMap] = useState(null);
 
-  const fetchDetections = async (pageNum = 1) => {
+  // Original fetchDetections - fetches a list of recent detections for the path
+  const fetchDetectionsForPath = async (currentPage = 1) => {
     try {
-      const skip = (pageNum - 1) * limit;
+      const skip = (currentPage - 1) * limit;
       const response = await fetch(
         `${backendUrl}/api/detections?skip=${skip}&limit=${limit}`
       );
@@ -51,23 +52,52 @@ const Map = () => {
         setDetections([]);
         setHasMore(false);
       }
-      setIsLoading(false);
     } catch (error) {
       console.error('Error fetching detections:', error);
       setError('Failed to load map data. Please try again later.');
-      setIsLoading(false);
+    }
+  };
+
+  // New function to fetch the latest detection for the map marker and centering
+  const fetchLatestDetectionForMap = async () => {
+    try {
+      // Assuming the API sorts by newest first by default, or supports ordering.
+      // Fetch page 1, limit 1 to get the single latest detection.
+      const response = await fetch(`${backendUrl}/api/detections?skip=0&limit=1`); 
+      const data = await response.json();
+      if (data && data.data && data.data.length > 0) {
+        console.log('[MapComponent] Fetched new latest detection for marker:', data.data[0]);
+        setLatestDetectionForMap(data.data[0]);
+        // Clear main error if this specific fetch is successful
+        // Avoids error message from path fetch overwriting a successful marker update
+        // setError(null); // Be cautious if path also sets errors
+      } else {
+        console.log('[MapComponent] No latest detection found for marker or empty data array.');
+        // Optionally set to null if no data, or keep stale: setLatestDetectionForMap(null);
+      }
+    } catch (error) {
+      console.error('Error fetching latest detection for marker:', error);
+      // Consider a specific error state for this if needed, or add to a general error list
+      // setError('Failed to fetch latest vehicle position.'); 
     }
   };
 
   useEffect(() => {
-    fetchDetections(page);
-    const interval = setInterval(() => fetchDetections(page), 5000);
-    return () => clearInterval(interval);
-  }, [page]);
+    // Initial fetches
+    fetchDetectionsForPath(page);
+    fetchLatestDetectionForMap();
 
-  if (isLoading) {
-    return <div className="p-4 text-center">Loading map data...</div>;
-  }
+    // Interval for fetching the list of detections for the path
+    const pathInterval = setInterval(() => fetchDetectionsForPath(page), 7000); // e.g., every 7 seconds
+    
+    // Interval for fetching the single latest detection for the marker (more frequent)
+    const latestDetectionInterval = setInterval(fetchLatestDetectionForMap, 3000); // e.g., every 3 seconds
+
+    return () => {
+      clearInterval(pathInterval);
+      clearInterval(latestDetectionInterval);
+    };
+  }, [page]); // Re-run if 'page' changes for the path
 
   if (error) {
     return <div className="p-4 text-red-500">{error}</div>;
@@ -76,13 +106,13 @@ const Map = () => {
   // Default initial center, e.g., Singapore. The map will pan to the latest point once data loads.
   const initialCenter = [1.3521, 103.8198]; 
   const preferredZoom = 19; // Further increased zoom level
-  const latestDetection = detections.length > 0 ? detections[0] : null;
-  const latestPosition = latestDetection ? [latestDetection.latitude, latestDetection.longitude] : null;
+  const latestPosition = latestDetectionForMap ? [latestDetectionForMap.latitude, latestDetectionForMap.longitude] : null;
   console.log('[MapComponent] Detections:', detections);
-  console.log('[MapComponent] Latest Detection:', latestDetection);
+  console.log('[MapComponent] Latest Detection for Map:', latestDetectionForMap);
   console.log('[MapComponent] Latest Position for map center:', latestPosition);
 
-  const pathPositions = detections.map(detection => [detection.latitude, detection.longitude]);
+  // Path uses the 'detections' state, which is a list of recent points
+  const pathPositions = detections.length > 0 ? detections.map(detection => [detection.latitude, detection.longitude]) : [];
 
   return (
     <div className="h-[600px] relative">
@@ -97,22 +127,22 @@ const Map = () => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
         {/* Show a single marker for the latest position */}
-        {latestDetection && (
+        {latestDetectionForMap && (
           <Marker
-            key={`current-${latestDetection.id}`}
+            key={`current-${latestDetectionForMap.id}`}
             position={latestPosition}
           >
             <Popup>
               <div>
-                <p><strong>Speed:</strong> {latestDetection.speed} km/h</p>
-                <p><strong>Time:</strong> {new Date(latestDetection.timestamp).toLocaleString()}</p>
-                {latestDetection.sign_label && (
-                  <p><strong>Sign:</strong> {latestDetection.sign_label}</p>
+                <p><strong>Speed:</strong> {latestDetectionForMap.speed} km/h</p>
+                <p><strong>Time:</strong> {new Date(latestDetectionForMap.timestamp).toLocaleString()}</p>
+                {latestDetectionForMap.sign_label && (
+                  <p><strong>Sign:</strong> {latestDetectionForMap.sign_label}</p>
                 )}
-                {latestDetection.image && (
+                {latestDetectionForMap.image && (
                   <div>
                     <p><strong>Image:</strong></p>
-                    <img src={latestDetection.image} alt={latestDetection.sign_label || 'Detection Image'} style={{maxWidth: '200px', maxHeight: '200px'}} />
+                    <img src={latestDetectionForMap.image} alt={latestDetectionForMap.sign_label || 'Detection Image'} style={{maxWidth: '200px', maxHeight: '200px'}} />
                   </div>
                 )}
                 {/* You can add more details from latestDetection here */}
@@ -121,7 +151,7 @@ const Map = () => {
           </Marker>
         )}
         {pathPositions.length > 0 && <Polyline pathOptions={{ color: 'blue' }} positions={pathPositions} />}
-        {map && latestPosition && <MapUpdater map={map} center={latestPosition} zoom={preferredZoom} />} // Always use preferredZoom
+        {latestDetectionForMap && latestPosition && <MapUpdater map={map} center={latestPosition} zoom={preferredZoom} />} // Always use preferredZoom
       </MapContainer>
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white p-2 rounded-lg shadow-lg">
         <div className="flex space-x-4">
@@ -146,4 +176,6 @@ const Map = () => {
   );
 };
 
+// Renamed fetchDetections to fetchDetectionsForPath for clarity
+// Added fetchLatestDetectionForMapMarker for the current marker logic
 export default Map;
