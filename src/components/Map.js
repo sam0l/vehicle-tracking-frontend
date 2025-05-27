@@ -13,9 +13,14 @@ L.Icon.Default.mergeOptions({
 });
 
 const MapUpdater = ({ map, center, zoom }) => {
+  console.log('[MapUpdater] Props received - Center:', center, 'Zoom:', zoom, 'Map Instance:', map ? 'Exists' : 'Missing');
   useEffect(() => {
     if (map && center) {
+      console.log('[MapUpdater] Calling map.setView with Center:', center, 'Zoom:', zoom);
       map.setView(center, zoom);
+    } else {
+      if (!map) console.log('[MapUpdater] map instance is not yet available.');
+      if (!center) console.log('[MapUpdater] center is not yet available (latestPosition might be null).');
     }
   }, [map, center, zoom]);
   return null;
@@ -73,6 +78,9 @@ const Map = () => {
   const preferredZoom = 19; // Further increased zoom level
   const latestDetection = detections.length > 0 ? detections[0] : null;
   const latestPosition = latestDetection ? [latestDetection.latitude, latestDetection.longitude] : null;
+  console.log('[MapComponent] Detections:', detections);
+  console.log('[MapComponent] Latest Detection:', latestDetection);
+  console.log('[MapComponent] Latest Position for map center:', latestPosition);
 
   const pathPositions = detections.map(detection => [detection.latitude, detection.longitude]);
 
@@ -98,8 +106,14 @@ const Map = () => {
               <div>
                 <p><strong>Speed:</strong> {latestDetection.speed} km/h</p>
                 <p><strong>Time:</strong> {new Date(latestDetection.timestamp).toLocaleString()}</p>
-                {latestDetection.sign_type && (
-                  <p><strong>Sign Type:</strong> {latestDetection.sign_type}</p>
+                {latestDetection.sign_label && (
+                  <p><strong>Sign:</strong> {latestDetection.sign_label}</p>
+                )}
+                {latestDetection.image && (
+                  <div>
+                    <p><strong>Image:</strong></p>
+                    <img src={latestDetection.image} alt={latestDetection.sign_label || 'Detection Image'} style={{maxWidth: '200px', maxHeight: '200px'}} />
+                  </div>
                 )}
                 {/* You can add more details from latestDetection here */}
               </div>
