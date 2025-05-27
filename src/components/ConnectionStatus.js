@@ -1,31 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { backendUrl } from '../config';
+import React, { useState } from 'react';
 
 const ConnectionStatus = () => {
-  const [lastSeen, setLastSeen] = useState(null);
+  const [lastSeen] = useState("2025-05-27T13:14:39Z");
   const isConnected = true; // Always connected
-  const error = null; // No errors
-  
-  // Fetch the latest detection to get its timestamp
-  useEffect(() => {
-    const fetchLatestDetection = async () => {
-      try {
-        const response = await fetch(`${backendUrl}/api/detections?limit=1`);
-        const data = await response.json();
-        if (data && data.data && data.data.length > 0) {
-          // Use frontend_timestamp if available, otherwise fall back to timestamp
-          const detection = data.data[0];
-          setLastSeen(detection.frontend_timestamp || detection.timestamp);
-        }
-      } catch (error) {
-        console.error('Error fetching latest detection:', error);
-      }
-    };
-    
-    fetchLatestDetection();
-    const interval = setInterval(fetchLatestDetection, 3000); // Update every 3 seconds
-    return () => clearInterval(interval);
-  }, []);
 
   const formatDate = (date) => {
     if (!date) return 'N/A';
@@ -54,7 +31,7 @@ const ConnectionStatus = () => {
     return diffMinutes <= 5; // Consider data recent if within last 5 minutes
   };
 
-  // Timestamp is updated via the latest detection fetch
+  // Using fixed timestamp
 
   return (
     <div className="bg-white shadow rounded-lg p-4">
