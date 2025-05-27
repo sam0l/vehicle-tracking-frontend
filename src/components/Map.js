@@ -70,7 +70,7 @@ const Map = () => {
 
   // Default initial center, e.g., Singapore. The map will pan to the latest point once data loads.
   const initialCenter = [1.3521, 103.8198]; 
-  const preferredZoom = 17; // Define a closer zoom level
+  const preferredZoom = 19; // Further increased zoom level
   const latestDetection = detections.length > 0 ? detections[0] : null;
   const latestPosition = latestDetection ? [latestDetection.latitude, latestDetection.longitude] : null;
 
